@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rafaqat CRM – Customer Enquiry</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; padding:20px; background:#f5f5f5; }
+    .container {
+      max-width: 600px; margin:auto; background:white;
+      padding:25px; border-radius:12px; box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
+    input, textarea, select {
+      width:100%; padding:12px; margin-top:8px; margin-bottom:15px;
+      border-radius:8px; border:1px solid #ccc;
+    }
+    button {
+      width:100%; padding:14px; background:#4b3aff;
+      color:white; border:none; border-radius:10px; font-size:16px;
+      cursor:pointer;
+    }
+    button:disabled { opacity:0.6; }
+    .success { background:#d4f8d4; padding:12px; border-radius:8px; margin-bottom:15px; display:none; }
+    .error { background:#ffd6d6; padding:12px; border-radius:8px; margin-bottom:15px; display:none; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Submit Your Enquiry</h2>
+    <p>Please fill the form below. Your details will be saved securely in Firestore.</p>
+
+    <div id="success" class="success">Your enquiry has been submitted!</div>
+    <div id="error" class="error">Something went wrong. Try again.</div>
+
+    <form id="enquiryForm">
+      <label>Full Name *</label>
+      <input type="text" id="name" required>
+
+      <label>Email *</label>
+      <input type="email" id="email" required>
+
+      <label>Phone *</label>
+      <input type="tel" id="phone" required>
+
+      <label>Message *</label>
+      <textarea id="message" required></textarea>
+
+      <label>Lead Type</label>
+      <select id="leadType">
+        <option>Hot</option>
+        <option>Warm</option>
+        <option>Cold</option>
+      </select>
+
+      <button type="submit" id="submitBtn">Submit</button>
+    </form>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    // IMPORT FIREBASE MODULES (v10+)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // YOUR FIREBASE CONFIG
+    const firebaseConfig = {
+      apiKey: "AIzaSyC6E2DWPHJZKQWuv6v3Bpyk9tVnkYU8dSk",
+      authDomain: "rafaqat-crm.firebaseapp.com",
+      projectId: "rafaqat-crm",
+      storageBucket: "rafaqat-crm.firebasestorage.app",
+      messagingSenderId: "321407849510",
+      appId: "1:321407849510:web:2200b31b9be0f6a9c1c2e7"
+    };
+
+    // INIT
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // FORM HANDLER
+    const form = document.getElementById("enquiryForm");
+    const successBox = document.getElementById("success");
+    const errorBox = document.getElementById("error");
+    const submitBtn = document.getElementById("submitBtn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        await addDoc(collection(db, "enquiries"), {
+          name: document.getElementById("name").value,
+          email: document.getElementById("email").value,
+          phone: document.getElementById("phone").value,
+          message: document.getElementById("message").value,
+          leadType: document.getElementById("leadType").value,
+          createdAt: new Date()
+        });
+
+        successBox.style.display = "block";
+        errorBox.style.display = "none";
+        form.reset();
+      } catch (err) {
+        console.log(err);
+        errorBox.style.display = "block";
+        successBox.style.display = "none";
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit";
+    });
+  </script>
+</body>
+</html>
